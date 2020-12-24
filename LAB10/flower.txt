@@ -1,0 +1,10 @@
+1300m * 6 wire = 7800
+200 * 12 holder = 2400
+200 * 60 bulb = 12000
+
+
+
+https://leetcode.com/explore/interview/card/top-interview-questions-easy/
+
+
+https://www.codechef.com/DEC20B
