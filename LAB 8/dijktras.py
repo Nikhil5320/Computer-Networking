@@ -1,89 +1,61 @@
-from collections import defaultdict
+import sys
 
 
 class Graph():
-    def __init__(self):
-        """
-        self.edges is a dict of all possible next nodes
-        e.g. {'X': ['A', 'B', 'C', 'E'], ...}
-        self.weights has all the weights between two nodes,
-        with the two nodes as a tuple as the key
-        e.g. {('X', 'A'): 7, ('X', 'B'): 2, ...}
-        """
-        self.edges = defaultdict(list)
-        self.weights = {}
 
-    def addEdge(self, from_node, to_node, weight):
-        # Note: assumes edges are bi-directional
-        self.edges[from_node].append(to_node)
-        self.edges[to_node].append(from_node)
-        self.weights[(from_node, to_node)] = weight
-        self.weights[(to_node, from_node)] = weight
+    def __init__(self, vertices):
+        self.V = vertices
+        self.graph = [[0 for column in range(vertices)]
+                      for row in range(vertices)]
 
+    def printSolution(self, dist, src):
+        print("Vertex Distance from Source '", src,"': ")
+        print("Vertex  Cost")
+        for node in range(self.V):
+            if(node == src):
+                continue
+            print(src,"->", node, "    ", dist[node])
 
-def dijsktra(graph, initial, end):
-    # shortest paths is a dict of nodes
-    # whose value is a tuple of (previous node, weight)
-    shortest_paths = {initial: (None, 0)}
-    current_node = initial
-    visited = set()
+    def minDistance(self, dist, sptSet):
+        min = sys.maxsize
 
-    while current_node != end:
-        visited.add(current_node)
-        destinations = graph.edges[current_node]
-        weight_to_current_node = shortest_paths[current_node][1]
+        for v in range(self.V):
+            if dist[v] < min and sptSet[v] == False:
+                min = dist[v]
+                min_index = v
 
-        for next_node in destinations:
-            weight = graph.weights[(current_node, next_node)
-                                   ] + weight_to_current_node
-            if next_node not in shortest_paths:
-                shortest_paths[next_node] = (current_node, weight)
-            else:
-                current_shortest_weight = shortest_paths[next_node][1]
-                if current_shortest_weight > weight:
-                    shortest_paths[next_node] = (current_node, weight)
+        return min_index
 
-        next_destinations = {
-            node: shortest_paths[node] for node in shortest_paths if node not in visited}
-        if not next_destinations:
-            return "Route Not Possible"
-        # next node is the destination with the lowest weight
-        current_node = min(next_destinations,
-                           key=lambda k: next_destinations[k][1])
+    def dijkstra(self, src):
 
-    # Work back through destinations in shortest path
-    path = []
+        dist = [sys.maxsize] * self.V
+        dist[src] = 0
+        sptSet = [False] * self.V
 
-    while current_node is not None:
-        path.append(current_node)
+        for cout in range(self.V):
+            u = self.minDistance(dist, sptSet)
+            sptSet[u] = True
 
-        next_node = shortest_paths[current_node][0]
-        current_node = next_node
+            for v in range(self.V):
+                if self.graph[u][v] > 0 and sptSet[v] == False and dist[v] > dist[u] + self.graph[u][v]:
+                    dist[v] = dist[u] + self.graph[u][v]
 
-    # Reverse path
-    path = path[::-1]
-    print('Shortest Weigth: ', current_shortest_weight)
-    print(path)
-    print('\n')
+        self.printSolution(dist, src)
 
 
-# Test using Above Picture
+print("Enter number of vertex: ", end="")
+n = int(input())
 
-g = Graph()
+g = Graph(n)
+print("\nEnter Weighted matrix: ")
+matrix = []
+for i in range(n):
+    row = []
+    row = list(map(int, input().split(" ")))
+    matrix.append(row)
 
-# Add edges with weight
-g.addEdge('a', 'b', 4)
-g.addEdge('a', 'c', 2)
-g.addEdge('b', 'c', 1)
-g.addEdge('b', 'd', 5)
-g.addEdge('c', 'd', 8)
-g.addEdge('c', 'e', 10)
-g.addEdge('d', 'e', 2)
-g.addEdge('d', 'z', 6)
-g.addEdge('e', 'z', 5)
-
-# Dijkstras Algo
-# test case 1
-dijsktra(g, 'a', 'z')
-# test case
-dijsktra(g, 'b', 'e')
+g.graph = matrix
+print("Enter src vertex: ", end="")
+src = int(input())
+print()
+g.dijkstra(src)
